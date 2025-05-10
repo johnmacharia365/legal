@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Legal Fee Calculator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+    <h2>Legal Fee Calculator</h2>
+    <form method="post">
+        {% csrf_token %}
+        <div class="mb-3">
+            <label class="form-label">Select Fee Type:</label>
+            <select name="fee_type" class="form-select" required>
+                <option value="" disabled {% if not selected_type %}selected{% endif %}>-- Choose Fee Type --</option>
+                <option value="land_sale" {% if selected_type == 'land_sale' %}selected{% endif %}>Land Sale/Purchase</option>
+                <option value="create_grantee" {% if selected_type == 'create_grantee' %}selected{% endif %}>Advocate for the Grantee (Security Creation)</option>
+                <option value="discharge_grantee_with" {% if selected_type == 'discharge_grantee_with' %}selected{% endif %}>Security - Grantee (Discharge w/ Undertaking)</option>
+                <option value="discharge_grantee_without" {% if selected_type == 'discharge_grantee_without' %}selected{% endif %}>Security - Grantee (Discharge w/o Undertaking)</option>
+                <option value="create_grantor" {% if selected_type == 'create_grantor' %}selected{% endif %}>Security - Grantor (Creation)</option>
+                <option value="discharge_grantor" {% if selected_type == 'discharge_grantor' %}selected{% endif %}>Security - Grantor (Discharge)</option>
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label for="amount" class="form-label">Enter Amount (Kshs):</label>
+            <input type="number" step="0.01" name="amount" class="form-control" required>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Calculate</button>
+    </form>
+
+    {% if fee is not None %}
+        <div class="alert alert-info mt-4">
+            <strong>Transaction Value:</strong> Kshs {{ amount|floatformat:2 }}<br>
+            <strong>Legal Fee:</strong> Kshs {{ fee|floatformat:2 }}<br><br>
+            <strong>Calculation Breakdown:</strong><br>
+            <div class="mt-2">{{ description|safe }}</div>
+        </div>
+    {% else %}
+        {% if description %}
+            <div class="alert alert-danger mt-4">
+                <strong>Error:</strong> {{ description }}
+            </div>
+        {% endif %}
+    {% endif %}
+</body>
+</html>

@@ -1,0 +1,103 @@
+{% load widget_tweaks %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Book Appointment</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f0f2f5;
+            padding-top: 50px;
+        }
+        .container {
+            max-width: 700px;
+        }
+        h2, h3 {
+            text-align: center;
+        }
+        textarea.form-control {
+            max-width: 400px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2 class="mb-4">Book an Appointment</h2>
+
+    {% if saved_appointment %}
+        <div class="alert alert-success mt-4" role="alert">
+            Appointment booked successfully!
+        </div>
+    {% endif %}
+     {% if form.errors and user.is_authenticated %}
+        <div class="alert alert-danger mt-3">
+            <ul class="mb-0">
+                {% for error in form.non_field_errors %}
+                    <li>{{ error }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+
+    {% if user.is_authenticated %}
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form method="POST" action="{% url 'book_appointment' %}">
+                    {% csrf_token %}
+                    <div class="row">
+                        {% for field in form %}
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">{{ field.label }}</label>
+                                {{ field|add_class:"form-control" }}
+                                {% if field.errors %}
+                                    <div class="text-danger small">
+                                        {% for error in field.errors %}
+                                            {{ error }}
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Book Appointment</button>
+                    <br/><br/>
+                    <a href="{% url 'appointmenttb' %}" class="btn btn-dark w-100">Back to Appointment</a>
+                </form>
+            </div>
+        </div>
+
+        <p>Logged in as: {{ request.user.username }}</p>  <!-- Display logged-in user's username -->
+
+    {% else %}
+        <div class="alert alert-warning text-center">You must be logged in to book an appointment.</div>
+    {% endif %}
+
+
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Disable earlier dates (min date)
+        const dateField = document.getElementById('id_appointment_date');
+        const today = new Date();
+        const dd = String(today.getDate()).padStart(2, '0');
+        const mm = String(today.getMonth() + 1).padStart(2, '0');
+        const yyyy = today.getFullYear();
+        today = yyyy + '-' + mm + '-' + dd;
+        dateField.setAttribute('min', today);  // Set min date to today
+
+        // Disable booked times (times already booked)
+        const bookedTimes = {{ booked_times|safe }};
+        const timeField = document.getElementById('id_appointment_time');
+        for (let i = 0; i < timeField.options.length; i++) {
+            if (bookedTimes.includes(timeField.options[i].value)) {
+                timeField.options[i].disabled = true;  // Disable booked times
+            }
+        }
+    });
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
